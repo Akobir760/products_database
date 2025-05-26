@@ -1,4 +1,5 @@
 from typing import Optional, Union
+from venv import logger
 import psycopg2
 from core.config import DB_CONFIG
 
@@ -44,8 +45,20 @@ class DatabaseManager:
 
 
 def execute_query(
-           query: str, 
-           params: Union[tuple, dict, None] = None
-           fatch: Union[str, None] = None
-) -> None | DictRow | Union[tuple, dict, None]
+    query: str,
+    params: Union[tuple, dict, None] = None,
+    fatch: Union[str, None] = None
+) -> None | DictRow | Union[tuple, dict, None]:
+    try:
+         with DatabaseManager() as db:
+              if fetch == 'one':
+                   return db.fetchone(query=query, params=params)
+              elif fetch == 'all':
+                   return db.fetchall(query=query, params=params)
+              else:
+                   db.exicute(query=query, params=params)
+                   return None
+    except psycopg2.Error as e:
+         logger.error(f"Connection error {e}")
+     
 
